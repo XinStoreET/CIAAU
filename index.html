@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>School Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#1b2033;--mu:#6b7390;--ac:#2f5bea;--bd:#e1e5f0;--ok:#16a34a;--no:#dc2626;--me:#dbe6ff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#12141c;--card:#1b1f2c;--tx:#eceff8;--mu:#99a1bd;--ac:#6f93ff;--bd:#2c3246;--me:#27407f;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,"Noto Sans Ethiopic","Noto Sans SC",sans-serif}
+.w{max-width:900px;margin:0 auto;padding:14px}.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin:12px 0}
+h1,h2,h3{margin:.3em 0}.mu{color:var(--mu);font-size:.88rem}
+button{font:inherit;background:var(--ac);color:#fff;border:0;border-radius:12px;padding:10px 16px;cursor:pointer}
+button.g{background:transparent;color:var(--tx);border:1px solid var(--bd)}button.d{background:var(--no)}button.s{padding:4px 10px;font-size:.85rem}
+input,select,textarea{font:inherit;width:100%;padding:10px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx);margin:4px 0 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>*{flex:1;min-width:120px}.row>button{flex:0 0 auto;min-width:0}
+.big{text-align:center;padding:40px 16px}.big button{width:100%;margin:8px 0;padding:18px;font-size:1.1rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tabs button{background:var(--card);color:var(--tx);border:1px solid var(--bd)}.tabs button.on{background:var(--ac);color:#fff}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.cal button{background:var(--bg);color:var(--tx);border:1px solid var(--bd);padding:8px 0}.cal button.on{background:var(--ac);color:#fff}.cal button.has{border-color:var(--ok);border-width:2px}
+.code{font-size:2.4rem;letter-spacing:.3em;text-align:center;font-weight:700;color:var(--ac)}
+.item{border-top:1px solid var(--bd);padding:12px 0;display:flex;justify-content:space-between;gap:8px}.item:first-child{border:0}
+.tag{display:inline-block;background:var(--bd);border-radius:20px;padding:1px 10px;font-size:.8rem;margin-right:6px}.err{color:var(--no)}.ok{color:var(--ok)}
+.media{max-width:100%;max-height:320px;border-radius:12px;margin-top:6px;display:block}
+.chat{height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:6px}
+.b{max-width:80%;padding:8px 12px;border-radius:16px;background:var(--bg);border:1px solid var(--bd);align-self:flex-start;word-break:break-word}.b.me{align-self:flex-end;background:var(--me)}
+.b small{display:block;color:var(--mu);font-size:.75rem}.b b{color:var(--ac);font-size:.85rem}.emo{display:flex;flex-wrap:wrap;gap:4px;padding:6px 0}.emo span{cursor:pointer;font-size:1.5rem}
+.lang{display:flex;gap:6px;justify-content:flex-end}.lang button{padding:3px 10px;font-size:.8rem}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.stat div{background:var(--bg);border-radius:12px;padding:12px;text-align:center}.stat b{font-size:1.6rem;display:block;color:var(--ac)}
+.due{color:var(--no);font-weight:600}
+</style></head><body><div class="w" id="app"></div>
+<script>
+const D={
+title:["School Portal","学校门户","የትምህርት ቤት መግቢያ"],tag:["Homework, attendance, class chat and your own AI helper.","作业、考勤、班级群聊和专属AI助手。","የቤት ሥራ፣ መገኘት፣ የክፍል ውይይትና የራስዎ AI ረዳት።"],
+start:["Start","开始","ጀምር"],who:["Who are you?","你是谁？","እርስዎ ማን ነዎት?"],teacher:["Teacher","老师","መምህር"],student:["Student","学生","ተማሪ"],admin:["Admin","管理员","አስተዳዳሪ"],
+back:["Back","返回","ተመለስ"],login:["Enter","进入","ግባ"],code:["Access code","访问码","የመግቢያ ኮድ"],fname:["Full name","姓名","ሙሉ ስም"],sid:["ID number","学号","የመታወቂያ ቁጥር"],
+wrong:["Wrong code.","访问码错误。","የተሳሳተ ኮድ።"],need:["Enter your name and ID.","请输入姓名和学号。","ስምና መታወቂያ ያስገቡ።"],out:["Log out","退出","ውጣ"],
+c0:["Elementary Listening & Speaking 1","初级听说（一）","አንደኛ ደረጃ ማዳመጥና መናገር 1"],c1:["Chinese Phonetics","汉语语音","የቻይንኛ ድምፀ-ድምፅ (ፎነቲክስ)"],c2:["Elementary Comprehensive Chinese","初级综合汉语","የቻይንኛ መሠረታዊ አጠቃላይ ትምህርት"],c3:["A Survey of Chinese Society and Life","中国社会与生活概览","የቻይና ማኅበረሰብና ሕይወት ዳሰሳ"],
+hw:["Homework","家庭作业","የቤት ሥራ"],as:["Assignment","作业任务","ተግባር"],ws:["Worksheet","练习表","የልምምድ ወረቀት"],nt:["Notice","通知","ማሳሰቢያ"],all:["All","全部","ሁሉም"],
+work:["Homework & Files","作业与资料","የቤት ሥራና ፋይሎች"],newp:["Post new work","发布新内容","አዲስ ይለጥፉ"],course:["Course","课程","ኮርስ"],type:["Type","类型","ዓይነት"],ttl:["Title","标题","ርዕስ"],det:["Details","详情","ዝርዝር"],due:["Due date","截止日期","የማስረከቢያ ቀን"],
+link:["File or worksheet link","文件或练习链接","የፋይል/ወረቀት ሊንክ"],pic:["Picture","图片","ምስል"],vid:["Video","视频","ቪዲዮ"],post:["Post","发布","ለጥፍ"],del:["Delete","删除","ሰርዝ"],none:["Nothing yet.","暂无内容。","እስካሁን ምንም የለም።"],
+req:["Course and title are required.","请填写课程和标题。","ኮርስና ርዕስ ያስፈልጋሉ።"],pin:["Pin","置顶","ሰካ"],pinned:["📌 Pinned","📌 已置顶","📌 ተሰክቷል"],file:["Open file","打开文件","ፋይል ክፈት"],
+up:["Uploading…","上传中…","በመጫን ላይ…"],upd:["✔ uploaded","✔ 已上传","✔ ተጭኗል"],upx:["Upload is not available here.","此处无法上传。","እዚህ መጫን አይቻልም።"],
+att:["Attendance","考勤","መገኘት"],todayc:["Enter today’s code from your teacher","输入老师给的今日签到码","መምህሩ የሰጠዎትን የዛሬ ኮድ ያስገቡ"],submit:["Submit","提交","ላክ"],okatt:["✔ Your attendance is recorded.","✔ 已记录你的出勤。","✔ መገኘትዎ ተመዝግቧል።"],
+badc:["That code is not correct for today.","今日签到码不正确。","ይህ ኮድ ለዛሬ ትክክል አይደለም።"],hist:["My history","我的记录","የእኔ ታሪክ"],rate:["Attendance rate","出勤率","የመገኘት መጠን"],pres:["Present","已到","የተገኙ"],abs:["Absent","缺席","ያልተገኙ"],
+gen:["Generate attendance code","生成签到码","የመገኘት ኮድ አውጣ"],tell:["Tell students this code. It only works for this date.","把此码告诉学生，仅当天有效。","ይህንን ኮድ ለተማሪዎች ይንገሩ። ለዚህ ቀን ብቻ ይሰራል።"],pick:["Pick a day to take attendance.","请选择日期点名。","መገኘት ለመውሰድ ቀን ይምረጡ።"],
+exp:["Export CSV","导出CSV","CSV አውርድ"],nob:["No one.","无人。","ማንም የለም።"],
+grp:["Group","班级群","ቡድን"],join:["Join group","加入群组","ቡድኑን ተቀላቀል"],jfirst:["Join the group to chat.","加入群组后才能聊天。","ለመወያየት ቡድኑን ይቀላቀሉ።"],mem:["Members","成员","አባላት"],add:["Add","添加","ጨምር"],rem:["Remove","移除","አስወግድ"],
+msg:["Write a message…","输入消息…","መልዕክት ይጻፉ…"],send:["Send","发送","ላክ"],clr:["Clear all chat","清空聊天","ውይይቱን ሁሉ አጽዳ"],
+ai:["AI Helper","AI助手","AI ረዳት"],aiph:["Ask anything about your courses…","询问课程相关问题…","ስለ ኮርሶችዎ ይጠይቁ…"],aiinfo:["Private: only you can see this chat.","私人对话：只有你能看到。","ግል ነው፤ እርስዎ ብቻ ያዩታል።"],aib:["The AI is not available right now.","AI暂时不可用。","AI አሁን አይገኝም።"],aic:["New chat","新对话","አዲስ ውይይት"],
+ov:["Overview","概览","አጠቃላይ እይታ"],nst:["Students in group","群组学生","በቡድኑ ያሉ ተማሪዎች"],npo:["Posts","发布数","ልጥፎች"],nda:["Attendance days","点名天数","የመገኘት ቀናት"],nms:["Chat messages","聊天消息","የውይይት መልዕክቶች"],
+done:["Done","完成","ተጠናቅቋል"],srch:["Search…","搜索…","ፈልግ…"],over:["Overdue","已逾期","ጊዜው አልፏል"],soon:["Due soon","即将截止","በቅርቡ ያበቃል"],demo:["Demo mode: data is saved on this device only.","演示模式：数据仅保存在本设备。","የሙከራ ሁነታ፦ መረጃ በዚህ መሣሪያ ብቻ ይቀመጣል።"],
+workT:["Homework & Files","作业与资料","የቤት ሥራና ፋይሎች"],sec:["Section","班级","ክፍል"],s1:["Section 1","1班","ክፍል 1"],s2:["Section 2","2班","ክፍል 2"],sboth:["Both sections","两个班","ሁለቱም ክፍሎች"],home:["Dashboard","我的看板","ዳሽቦርድ"],dict:["Dictionary","词典","መዝገበ ቃላት"],dph:["Search English, 中文, pinyin or አማርኛ…","搜索英文、中文、拼音或阿姆哈拉语…","እንግሊዝኛ፣ ቻይንኛ፣ ፒንዪን ወይም አማርኛ ይፈልጉ…"],dnf:["Not in the word list. Try the AI translation.","词表中没有，请试试AI翻译。","በቃላት ዝርዝሩ የለም። የAI ትርጉምን ይሞክሩ።"],dai:["Ask AI to translate","让AI翻译","AI ያስተርጉም"],
+todo:["To do","待办","የሚሰሩ"],newt:["New since your last visit","自上次访问以来的新内容","ከመጨረሻ ጉብኝትዎ ወዲህ አዲስ"],pins:["Pinned notices","置顶通知","የተሰኩ ማሳሰቢያዎች"],nod:["All caught up! 🎉","全部完成！🎉","ሁሉም ተጠናቅቋል! 🎉"],
+aopen:["Attendance is open today. Enter the code from your teacher.","今天已开放签到，请输入老师给的签到码。","ዛሬ መገኘት ተከፍቷል። መምህሩ የሰጠዎትን ኮድ ያስገቡ።"],anot:["Attendance has not been opened today.","今天还没有开放签到。","ዛሬ መገኘት አልተከፈተም።"],goatt:["Go to attendance","去签到","ወደ መገኘት ሂድ"]};
+const CODES={teacher:"CIAAU123",student:"123456789",admin:"dagitad123"},CATS=["hw","as","ws","nt"],COL=["work","codes","present","group","chat"];
+const EMO=Array.from("😀😂😍😊👍🙏🎉🔥❤️😢😮🤔👏💯📚✏️🌟").filter(c=>c!=="\uFE0F").concat(["🇨🇳"]);
+const W=[["hello","你好","nǐ hǎo","ሰላም"],["thank you","谢谢","xièxie","አመሰግናለሁ"],["goodbye","再见","zàijiàn","ደህና ሁን"],["please","请","qǐng","እባክዎ"],["sorry","对不起","duìbuqǐ","ይቅርታ"],["yes","是","shì","አዎ"],["no","不","bù","አይ"],["I","我","wǒ","እኔ"],["you","你","nǐ","አንተ"],["he / she","他 / 她","tā","እሱ / እሷ"],["we","我们","wǒmen","እኛ"],["how are you?","你好吗？","nǐ hǎo ma","እንዴት ነህ?"],["I am fine","我很好","wǒ hěn hǎo","ደህና ነኝ"],["nice to meet you","很高兴认识你","hěn gāoxìng rènshi nǐ","ስለተዋወቅን ደስ ብሎኛል"],["I don’t understand","我不懂","wǒ bù dǒng","አልገባኝም"],["excuse me (may I ask)","请问","qǐngwèn","ይቅርታ፣ ልጠይቅ"],
+["teacher","老师","lǎoshī","መምህር"],["student","学生","xuésheng","ተማሪ"],["school","学校","xuéxiào","ትምህርት ቤት"],["class / lesson","课","kè","ክፍል / ትምህርት"],["book","书","shū","መጽሐፍ"],["pen","笔","bǐ","እስክሪብቶ"],["homework","作业","zuòyè","የቤት ሥራ"],["exam","考试","kǎoshì","ፈተና"],["attendance","考勤","kǎoqín","መገኘት"],["dictionary","词典","cídiǎn","መዝገበ ቃላት"],["pinyin","拼音","pīnyīn","ፒንዪን"],["tone","声调","shēngdiào","ቃና"],["Chinese character","汉字","Hànzì","የቻይንኛ ፊደል"],["listening","听力","tīnglì","ማዳመጥ"],["speaking","口语","kǒuyǔ","መናገር"],
+["language","语言","yǔyán","ቋንቋ"],["Chinese (language)","汉语","Hànyǔ","ቻይንኛ"],["English","英语","Yīngyǔ","እንግሊዝኛ"],["Amharic","阿姆哈拉语","Āmǔhālāyǔ","አማርኛ"],["China","中国","Zhōngguó","ቻይና"],["Ethiopia","埃塞俄比亚","Āisài’ébǐyà","ኢትዮጵያ"],["country","国家","guójiā","ሀገር"],["city","城市","chéngshì","ከተማ"],["name","名字","míngzi","ስም"],
+["mother","妈妈","māma","እናት"],["father","爸爸","bàba","አባት"],["older brother","哥哥","gēge","ወንድም"],["older sister","姐姐","jiějie","እህት"],["friend","朋友","péngyou","ጓደኛ"],["family / home","家","jiā","ቤተሰብ / ቤት"],["house","房子","fángzi","ቤት"],
+["water","水","shuǐ","ውሃ"],["rice","米饭","mǐfàn","ሩዝ"],["food / meal","饭","fàn","ምግብ"],["tea","茶","chá","ሻይ"],["coffee","咖啡","kāfēi","ቡና"],["bread","面包","miànbāo","ዳቦ"],["meat","肉","ròu","ሥጋ"],["egg","鸡蛋","jīdàn","እንቁላል"],["fruit","水果","shuǐguǒ","ፍራፍሬ"],
+["today","今天","jīntiān","ዛሬ"],["tomorrow","明天","míngtiān","ነገ"],["yesterday","昨天","zuótiān","ትናንት"],["day","天","tiān","ቀን"],["morning","早上","zǎoshang","ጠዋት"],["night / evening","晚上","wǎnshang","ማታ"],["week","星期","xīngqī","ሳምንት"],["year","年","nián","ዓመት"],["time","时间","shíjiān","ጊዜ"],
+["one","一","yī","አንድ"],["two","二","èr","ሁለት"],["three","三","sān","ሦስት"],["four","四","sì","አራት"],["five","五","wǔ","አምስት"],["ten","十","shí","አሥር"],
+["big","大","dà","ትልቅ"],["small","小","xiǎo","ትንሽ"],["good","好","hǎo","ጥሩ"],["bad","坏","huài","መጥፎ"],["beautiful","漂亮","piàoliang","ቆንጆ"],["hot","热","rè","ሞቃት"],["cold","冷","lěng","ቀዝቃዛ"],["happy","高兴","gāoxìng","ደስተኛ"],["love","爱","ài","ፍቅር"],
+["to eat","吃","chī","መብላት"],["to drink","喝","hē","መጠጣት"],["to go","去","qù","መሄድ"],["to come","来","lái","መምጣት"],["to speak","说","shuō","መናገር"],["to listen","听","tīng","መስማት"],["to read","读","dú","ማንበብ"],["to write","写","xiě","መጻፍ"],["to learn","学","xué","መማር"],["to look / watch","看","kàn","ማየት"],["to want / think","想","xiǎng","መፈለግ"],["to like","喜欢","xǐhuan","መውደድ"],["to buy","买","mǎi","መግዛት"],["money","钱","qián","ገንዘብ"],["how much is it?","多少钱？","duōshao qián","ስንት ነው?"]];
+const S={work:[],codes:[],present:[],group:[],chat:[]},subs={};
+let LI=+(localStorage.getItem("sp_l")||0),db=null,A=null,SM=null,me=null,tab="",msg="",filt="all",fc="all",q="",sel=null,cm=new Date(),gate=null,P={},aiH=[],aiBusy=false,emo=false,seen=0,dA="",fs="all";
+const t=k=>(D[k]||[k])[LI]||D[k][0],$=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"),today=()=>iso(new Date());
+const clock=()=>new Date().toLocaleTimeString("en",{hour:"2-digit",minute:"2-digit"}),uid=()=>Math.random().toString(36).slice(2,9);
+const genCode=()=>{const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return s};
+const lsGet=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"null")??d}catch(e){return d}},lsPut=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const done=()=>lsGet("sp_done_"+me.sid,[]);
+/* storage: shared database when available, else this device only */
+function sub(c){if(db){db.collection(c).onSnapshot(s=>{S[c]=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{});return}
+ subs[c]=()=>{S[c]=Object.entries(lsGet("sp_"+c,{})).map(([id,v])=>({id,...v}));render()};subs[c]()}
+async function put(c,id,d){if(db){try{await db.collection(c).doc(id).set(d)}catch(e){msg=e.message||e.code}}else{const o=lsGet("sp_"+c,{});o[id]=d;lsPut("sp_"+c,o);subs[c]()}}
+async function del(c,id){if(db){try{await db.collection(c).doc(id).delete()}catch(e){msg=e.message||e.code}}else{const o=lsGet("sp_"+c,{});delete o[id];lsPut("sp_"+c,o);subs[c]()}}
+(async()=>{try{if(window.claude){db=await claude.use("db");A=await claude.use("assets");SM=await claude.use("sample")}}catch(e){}COL.forEach(sub);render()})();
+
+function render(){
+ const a=$("#app"),keep={},ae=document.activeElement&&document.activeElement.id;
+ a.querySelectorAll("input:not([type=file]):not([type=password]):not([type=checkbox]),textarea,select").forEach(e=>{if(e.id)keep[e.id]=e.value});
+ const cl=$(".chat:not(.aiL)"),stick=!cl||cl.scrollTop+cl.clientHeight>=cl.scrollHeight-40;
+ const lang=`<div class="lang">${["EN","中文","አማ"].map((n,i)=>`<button class="${i===LI?"":"g"} s" data-a="lang" data-i="${i}">${n}</button>`).join("")}</div>`;
+ let h;
+ if(!me&&!gate)h=`<div class="card big"><h1>${t("title")}</h1><p class="mu">${t("tag")}</p><button data-a="pick">${t("start")}</button></div>`;
+ else if(!me&&gate==="pick")h=`<div class="card big"><h2>${t("who")}</h2><button data-a="role" data-r="teacher">${t("teacher")}</button><button data-a="role" data-r="student">${t("student")}</button><p><button class="g s" data-a="role" data-r="admin">${t("admin")}</button></p><button class="g" data-a="home">${t("back")}</button></div>`;
+ else if(!me)h=`<div class="card"><h2>${t(gate)}</h2>${gate==="student"?`<label>${t("fname")}</label><input id="nm"><label>${t("sid")}</label><input id="sid"><label>${t("sec")}</label><select id="se"><option value="1">${t("s1")}</option><option value="2">${t("s2")}</option></select>`:""}<label>${t("code")}</label><input id="cd" type="password"><div class="err">${esc(msg)}</div><div class="row"><button data-a="login">${t("login")}</button><button class="g" data-a="pick">${t("back")}</button></div></div>`;
+ else{
+  const R=me.role,tabs=R==="teacher"?["work","att","dict","ai"]:R==="student"?["home","work","att","grp","dict","ai"]:["ov","work","att","grp","dict","ai"];
+  if(!tabs.includes(tab))tab=tabs[0];
+  h=`<div class="row"><div><h2>${R==="student"?esc(me.name):t(R)}</h2>${R==="student"?`<span class="mu">ID ${esc(me.sid)} · ${t("s"+me.sec)}</span>`:""}</div><button class="g s" data-a="out">${t("out")}</button></div>${db?"":`<div class="mu">${t("demo")}</div>`}
+  <div class="tabs">${tabs.map(x=>`<button class="${x===tab?"on":""}" data-a="tab" data-t="${x}">${t(x==="work"&&R==="student"?"hw":x==="work"?"workT":x)}</button>`).join("")}</div><div class="err">${esc(msg)}</div>${({work,att,grp,ai,ov,dict:dictT,home:homeT})[tab]()}`;msg="";
+ }
+ a.innerHTML=lang+h;
+ for(const k in keep){const e=document.getElementById(k);if(e)e.value=keep[k]}
+ if(ae){const e=document.getElementById(ae);if(e&&e.focus)e.focus()}
+ const c2=$(".chat:not(.aiL)");if(c2&&stick)c2.scrollTop=c2.scrollHeight;const c3=$(".aiL");if(c3)c3.scrollTop=c3.scrollHeight;
+}
+const vis=w=>me.role==="student"?(w.course==3||!w.sec||w.sec==="0"||w.sec===me.sec):(fs==="all"||w.course==3||!w.sec||w.sec==="0"||w.sec===fs);
+const courseSel=id=>`<select id="${id}">${[0,1,2,3].map(i=>`<option value="${i}">${t("c"+i)}</option>`).join("")}</select>`;
+function work(){
+ const R=me.role,T=R==="teacher",St=R==="student",dn=St?done():[],now=today(),soon=iso(new Date(Date.now()+2*864e5));
+ const list=S.work.filter(w=>vis(w)&&(filt==="all"||w.cat===filt)&&(fc==="all"||w.course==fc)&&(!q||(w.title+" "+w.de).toLowerCase().includes(q.toLowerCase()))).sort((x,y)=>(y.pin?1:0)-(x.pin?1:0)||(y.at||0)-(x.at||0));
+ return (T?`<div class="card"><h3>${t("newp")}</h3><div class="row"><div><label>${t("course")}</label>${courseSel("co")}</div><div><label>${t("sec")}</label><select id="sc"><option value="0">${t("sboth")}</option><option value="1">${t("s1")}</option><option value="2">${t("s2")}</option></select></div><div><label>${t("type")}</label><select id="ca">${CATS.map(c=>`<option value="${c}">${t(c)}</option>`).join("")}</select></div></div>
+ <label>${t("ttl")}</label><input id="ti"><label>${t("det")}</label><textarea id="de" rows="3"></textarea>
+ <div class="row"><div><label>${t("due")}</label><input id="du" type="date"></div><div><label>${t("link")}</label><input id="ln" placeholder="https://…"></div></div>
+ <div class="row"><div><label>${t("pic")} ${P.img?t("upd"):""}</label><input type="file" accept="image/*" data-f="img"></div><div><label>${t("vid")} ${P.vid?t("upd"):""}</label><input type="file" accept="video/*" data-f="vid"></div></div>
+ <button data-a="post">${t("post")}</button></div>`:"")+
+ `<div class="row"><select id="fcs" data-a="fc"><option value="all">${t("all")}</option>${[0,1,2,3].map(i=>`<option value="${i}" ${i==fc?"selected":""}>${t("c"+i)}</option>`).join("")}</select>${me.role==="student"?"":`<select id="fss" data-a="fs"><option value="all">${t("sec")}: ${t("all")}</option><option value="1" ${fs==="1"?"selected":""}>${t("s1")}</option><option value="2" ${fs==="2"?"selected":""}>${t("s2")}</option></select>`}<input id="qs" placeholder="${t("srch")}"></div>
+ <div class="tabs">${["all",...CATS].map(c=>`<button class="${c===filt?"on":""}" data-a="filt" data-c="${c}">${t(c)}</button>`).join("")}</div>
+ <div class="card">${list.length?list.map(w=>`<div class="item"><div style="min-width:0">${w.pin?`<div class="mu">${t("pinned")}</div>`:""}<span class="tag">${t(w.cat)}</span><span class="tag">${t("c"+w.course)}</span>${w.course!=3&&w.sec&&w.sec!=="0"?`<span class="tag">${t("s"+w.sec)}</span>`:""}<b>${esc(w.title)}</b><div>${esc(w.de)}</div>
+ <div class="mu">${w.du?(St&&w.du<now?`<span class="due">${t("over")}</span> `:St&&w.du<=soon?`<span class="due">${t("soon")}</span> `:"")+t("due")+": "+esc(w.du)+" · ":""}${/^https?:\/\//.test(w.ln||"")?`<a href="${esc(w.ln)}" target="_blank" rel="noopener">${t("file")}</a>`:""}</div>
+ ${w.img?`<img class="media" src="${esc(w.img)}" alt="">`:""}${w.vid?`<video class="media" src="${esc(w.vid)}" controls></video>`:""}
+ ${St?`<label class="mu"><input type="checkbox" style="width:auto;margin:6px 6px 0 0" data-a="dn" data-i="${w.id}" ${dn.includes(w.id)?"checked":""}>${t("done")}</label>`:""}</div>
+ ${St?"":`<div><button class="g s" data-a="pinw" data-i="${w.id}">${t("pin")}</button> <button class="d s" data-a="delw" data-i="${w.id}">${t("del")}</button></div>`}</div>`).join(""):`<span class="mu">${t("none")}</span>`}</div>`;
+}
+function att(){
+ if(me.role==="student"){const d=today(),ok=S.present.find(p=>p.id===d+"__"+me.sid),mine=S.present.filter(p=>p.sid===me.sid),pc=S.codes.length?Math.round(100*mine.length/S.codes.length):0;
+  return `<div class="card"><h3>${d}</h3>${ok?`<p class="ok">${t("okatt")}</p>`:`<label>${t("todayc")}</label><input id="ac" style="text-transform:uppercase"><button data-a="mark">${t("submit")}</button>`}</div>
+  <div class="card"><h3>${t("rate")}: ${pc}%</h3><h3>${t("hist")}</h3>${mine.sort((a,b)=>b.date.localeCompare(a.date)).map(p=>`<div class="item">${esc(p.date)}<span class="ok">${t("pres")}</span></div>`).join("")||`<span class="mu">${t("none")}</span>`}</div>`}
+ const y=cm.getFullYear(),m=cm.getMonth(),f0=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate();let cells="";for(let i=0;i<f0;i++)cells+="<span></span>";
+ for(let d=1;d<=n;d++){const k=iso(new Date(y,m,d));cells+=`<button class="${k===sel?"on":""} ${S.codes.find(c=>c.id===k)?"has":""}" data-a="day" data-d="${k}">${d}</button>`}
+ const code=sel&&S.codes.find(c=>c.id===sel),pr=S.present.filter(p=>p.date===sel),ab=S.group.filter(g=>!pr.some(p=>p.sid===g.id));
+ return `<div class="card"><div class="row"><button class="g s" data-a="mo" data-n="-1">‹</button><h3 style="text-align:center">${cm.toLocaleString(["en","zh","am"][LI],{month:"long",year:"numeric"})}</h3><button class="g s" data-a="mo" data-n="1">›</button></div><div class="cal">${cells}</div></div>
+ ${sel?`<div class="card"><h3>${sel}</h3>${code?`<div class="code">${esc(code.code)}</div><p class="mu" style="text-align:center">${t("tell")}</p>`:`<button data-a="gen">${t("gen")}</button>`}
+ <h3>${t("pres")} (${pr.length})</h3>${pr.map(p=>`<div class="item"><span>${esc(p.name)} <span class="mu">· ${esc(p.sid)}${p.sec?" · "+t("s"+p.sec):""}</span></span><span class="mu">${esc(p.time)}</span></div>`).join("")||`<span class="mu">${t("nob")}</span>`}
+ ${code?`<h3>${t("abs")} (${ab.length})</h3>${ab.map(g=>`<div class="item">${esc(g.name)}${g.sec?` <span class="mu">· ${t("s"+g.sec)}</span>`:""}</div>`).join("")||`<span class="mu">${t("nob")}</span>`}`:""}</div>`:`<p class="mu">${t("pick")}</p>`}
+ <button class="g" data-a="csv">${t("exp")}</button>`;
+}
+function grp(){
+ const adm=me.role==="admin",jn=S.group.some(g=>g.id===me.sid),ms=[...S.chat].sort((a,b)=>a.ts-b.ts);
+ return `<div class="card"><h3>${t("grp")} · ${S.group.length} ${t("mem")}</h3>${!adm&&!jn?`<button data-a="join">${t("join")}</button>`:`
+ <div class="chat">${ms.map(m=>`<div class="b ${m.sid===me.sid?"me":""}"><b>${esc(m.name)}</b>${m.text?`<div>${esc(m.text)}</div>`:""}${m.img?`<img class="media" src="${esc(m.img)}" alt="">`:""}<small>${esc(m.time)}${adm?` · <a href="#" data-a="delm" data-i="${m.id}">${t("del")}</a>`:""}</small></div>`).join("")}</div>
+ ${emo?`<div class="emo">${EMO.map(e=>`<span data-a="em" data-e="${e}">${e}</span>`).join("")}</div>`:""}
+ <div class="row"><button class="g" data-a="emt">😊</button><label style="flex:0;border:1px solid var(--bd);border-radius:12px;padding:8px 12px;cursor:pointer">🖼<input type="file" accept="image/*" data-f="cimg" hidden></label><textarea id="cm" rows="1" placeholder="${t("msg")}" style="margin:0"></textarea><button data-a="sendm">${t("send")}</button></div>`}</div>
+ <div class="card"><h3>${t("mem")}</h3>${adm?`<div class="row"><input id="gn" placeholder="${t("fname")}"><input id="gi" placeholder="${t("sid")}"><select id="gs"><option value="1">${t("s1")}</option><option value="2">${t("s2")}</option></select><button data-a="addg">${t("add")}</button></div>`:""}
+ ${[...S.group].sort((a,b)=>a.name.localeCompare(b.name)).map(g=>`<div class="item"><span>${esc(g.name)} <span class="mu">· ${esc(g.id)}${g.sec?" · "+t("s"+g.sec):""}</span></span>${adm?`<button class="d s" data-a="delg" data-i="${esc(g.id)}">${t("rem")}</button>`:""}</div>`).join("")}</div>
+ ${adm?`<button class="d" data-a="clr">${t("clr")}</button>`:""}`;
+}
+function ai(){return `<div class="card"><p class="mu">${t("aiinfo")}</p><div class="chat aiL">${aiH.map(m=>`<div class="b ${m.role==="user"?"me":""}">${esc(m.content).replace(/\n/g,"<br>")}</div>`).join("")}${aiBusy?`<div class="b">…</div>`:""}</div>
+ <div class="row"><textarea id="aiq" rows="1" placeholder="${t("aiph")}" style="margin:0"></textarea><button data-a="ask">${t("send")}</button><button class="g" data-a="aic">${t("aic")}</button></div></div>`}
+function ov(){const r=S.codes.length&&S.group.length?Math.round(100*S.present.length/(S.codes.length*S.group.length)):0;
+ return `<div class="card stat"><div><b>${S.group.length}</b>${t("nst")}</div><div><b>${S.work.length}</b>${t("npo")}</div><div><b>${S.codes.length}</b>${t("nda")}</div><div><b>${r}%</b>${t("rate")}</div><div><b>${S.chat.length}</b>${t("nms")}</div></div>`}
+const nm_=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+function dres(qv){const k=nm_(qv.trim()),r=W.filter(w=>!k||w.some(x=>nm_(x).includes(k)));
+ return r.length?r.map(w=>`<div class="item"><div><b style="font-size:1.2rem">${w[1]}</b> <span class="mu">${w[2]}</span><div>${w[0]} · ${w[3]}</div></div></div>`).join(""):`<span class="mu">${t("dnf")}</span>`}
+function dictT(){return `<div class="card"><input id="dq" placeholder="${t("dph")}"><button class="g" data-a="dai">${t("dai")}</button>${dA?`<div class="b" style="max-width:100%;margin-top:10px">${esc(dA).replace(/\n/g,"<br>")}</div>`:""}<div id="dres">${dres("")}</div></div>`}
+function homeT(){
+ const d=done(),now=today(),soon=iso(new Date(Date.now()+2*864e5)),pend=S.work.filter(w=>vis(w)&&w.cat!=="nt"&&!d.includes(w.id)),
+ over=pend.filter(w=>w.du&&w.du<now),ds=pend.filter(w=>w.du&&w.du>=now&&w.du<=soon),nw=S.work.filter(w=>vis(w)&&w.at>seen),pins=S.work.filter(w=>vis(w)&&w.pin),
+ code=S.codes.find(c=>c.id===now),mk=S.present.find(p=>p.id===now+"__"+me.sid),mine=S.present.filter(p=>p.sid===me.sid),pc=S.codes.length?Math.round(100*mine.length/S.codes.length):0,
+ row=w=>`<div class="item"><div><span class="tag">${t(w.cat)}</span><span class="tag">${t("c"+w.course)}</span><b>${esc(w.title)}</b><div class="mu">${w.du?(w.du<now?`<span class="due">${t("over")}</span> `:"")+t("due")+": "+esc(w.du):""}</div></div><label class="mu"><input type="checkbox" style="width:auto;margin:0 6px 0 0" data-a="dn" data-i="${w.id}" ${d.includes(w.id)?"checked":""}>${t("done")}</label></div>`,
+ todo=[...pend].sort((a,b)=>(a.du||"9").localeCompare(b.du||"9"));
+ return `<div class="card stat"><div><b>${pend.length}</b>${t("todo")}</div><div><b class="due">${over.length}</b>${t("over")}</div><div><b>${ds.length}</b>${t("soon")}</div><div><b>${nw.length}</b>${t("newt")}</div><div><b>${pc}%</b>${t("rate")}</div></div>
+ <div class="card"><h3>${t("att")}</h3>${mk?`<p class="ok">${t("okatt")}</p>`:code?`<p>${t("aopen")}</p><button data-a="tab" data-t="att">${t("goatt")}</button>`:`<p class="mu">${t("anot")}</p>`}</div>
+ ${pins.length?`<div class="card"><h3>${t("pins")}</h3>${pins.map(row).join("")}</div>`:""}${nw.length?`<div class="card"><h3>${t("newt")}</h3>${nw.map(row).join("")}</div>`:""}
+ <div class="card"><h3>${t("todo")}</h3>${todo.length?todo.map(row).join(""):`<p>${t("nod")}</p>`}</div>`}
+async function up(f){if(!A){msg=t("upx");return null}try{return (await A.upload(f)).url}catch(e){msg=e.message||t("upx");return null}}
+const sys=()=>"You are a friendly study helper for students of a Chinese-language school in Ethiopia. Courses: Elementary Listening & Speaking 1, Chinese Phonetics, Elementary Comprehensive Chinese, A Survey of Chinese Society and Life. Explain simply, give pinyin with Chinese characters, and reply in "+["English","Chinese","Amharic"][LI]+" unless asked otherwise. Keep answers short.";
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&(e.target.id==="cm"||e.target.id==="aiq")){e.preventDefault();document.querySelector(`[data-a=${e.target.id==="cm"?"sendm":"ask"}]`).click()}});
+const onType=e=>{if(e.isComposing)return;if(e.target.id==="qs"){q=e.target.value;render()}if(e.target.id==="dq")$("#dres").innerHTML=dres(e.target.value)};
+document.addEventListener("input",onType);document.addEventListener("compositionend",onType);
+document.addEventListener("change",async e=>{const x=e.target,f=x.dataset.f;
+ if(x.dataset.a==="fc"){fc=x.value;return render()}
+ if(x.dataset.a==="fs"){fs=x.value;return render()}
+ if(x.dataset.a==="dn"){const d=done(),i=x.dataset.i;lsPut("sp_done_"+me.sid,d.includes(i)?d.filter(z=>z!==i):[...d,i]);return render()}
+ if(!f||!x.files[0])return;const u=await up(x.files[0]);
+ if(f==="cimg"&&u)await put("chat",uid(),{name:me.name,sid:me.sid,img:u,text:"",ts:Date.now(),time:clock()});else if(u)P[f]=u;render()});
+document.addEventListener("click",async e=>{
+ const b=e.target.closest("[data-a]");if(!b||b.tagName==="SELECT"||b.tagName==="INPUT")return;e.preventDefault();const a=b.dataset.a,v=id=>($("#"+id)||{}).value?.trim()||"";
+ if(a==="lang"){LI=+b.dataset.i;try{localStorage.setItem("sp_l",LI)}catch(_){}}
+ else if(a==="pick"){gate="pick";msg=""}else if(a==="home")gate=null;else if(a==="role"){gate=b.dataset.r;msg=""}
+ else if(a==="login"){if(v("cd")!==CODES[gate]){msg=t("wrong");return render()}
+  if(gate==="student"){if(!v("nm")||!v("sid")){msg=t("need");return render()}me={role:"student",name:v("nm"),sid:v("sid"),sec:v("se")||"1"};seen=+lsGet("sp_seen_"+me.sid,0);lsPut("sp_seen_"+me.sid,Date.now())}
+  else me={role:gate,name:gate==="admin"?"Admin":"Teacher",sid:gate};gate=null;tab="";msg="";aiH=[];dA=""}
+ else if(a==="out"){me=null;gate=null;sel=null;aiH=[];dA=""}else if(a==="tab")tab=b.dataset.t;else if(a==="filt")filt=b.dataset.c;
+ else if(a==="post"){if(!v("ti")){msg=t("req");return render()}await put("work",uid(),{course:v("co"),sec:v("co")==="3"?"0":v("sc"),cat:v("ca"),title:v("ti"),de:v("de"),du:v("du"),ln:v("ln"),img:P.img||"",vid:P.vid||"",at:Date.now()});P={};["ti","de","du","ln"].forEach(i=>{const x=$("#"+i);if(x)x.value=""})}
+ else if(a==="delw")await del("work",b.dataset.i);
+ else if(a==="pinw"){const w=S.work.find(x=>x.id===b.dataset.i),{id,...r}=w;await put("work",id,{...r,pin:!w.pin})}
+ else if(a==="mo")cm=new Date(cm.getFullYear(),cm.getMonth()+ +b.dataset.n,1);else if(a==="day")sel=b.dataset.d;
+ else if(a==="gen")await put("codes",sel,{code:genCode()});
+ else if(a==="mark"){const c=S.codes.find(x=>x.id===today());if(!c||c.code!==v("ac").toUpperCase()){msg=t("badc");return render()}await put("present",today()+"__"+me.sid,{date:today(),name:me.name,sid:me.sid,sec:me.sec,time:clock()})}
+ else if(a==="csv"){const r=["date,id,name,section,time",...[...S.present].sort((x,y)=>x.date.localeCompare(y.date)).map(p=>[p.date,p.sid,'"'+p.name.replace(/"/g,'""')+'"',p.sec||"",p.time].join(","))].join("\n");
+  try{const d=await claude.use("downloads");await d.save({filename:"attendance.csv",data:r})}catch(_){msg=t("upx")}}
+ else if(a==="join")await put("group",me.sid,{name:me.name,sec:me.sec});
+ else if(a==="addg"){if(!v("gn")||!v("gi")){msg=t("need");return render()}await put("group",v("gi"),{name:v("gn"),sec:v("gs")});["gn","gi"].forEach(i=>$("#"+i).value="")}
+ else if(a==="delg")await del("group",b.dataset.i);else if(a==="delm")await del("chat",b.dataset.i);
+ else if(a==="clr"){for(const m of S.chat)await del("chat",m.id)}
+ else if(a==="emt")emo=!emo;else if(a==="em"){const c=$("#cm");c.value+=b.dataset.e;c.focus();return}
+ else if(a==="sendm"){const x=v("cm");if(!x)return;$("#cm").value="";await put("chat",uid(),{name:me.name,sid:me.sid,text:x,ts:Date.now(),time:clock()})}
+ else if(a==="dai"){const x=v("dq");if(!x)return;if(!SM){msg=t("aib");return render()}dA="…";render();
+  try{dA=(await SM('Translate the word or phrase "'+x+'" between English, Chinese (with pinyin) and Amharic, each on its own line, then one short Chinese example sentence with pinyin and English meaning. Plain text only.')).text}catch(_){dA="";msg=t("aib")}}
+ else if(a==="aic")aiH=[];
+ else if(a==="ask"){const x=v("aiq");if(!x||aiBusy)return;if(!SM){msg=t("aib");return render()}$("#aiq").value="";aiH.push({role:"user",content:x});aiBusy=true;render();
+  try{const m=aiH.map((z,i)=>i?z:{role:"user",content:sys()+"\n\n"+z.content});aiH.push({role:"assistant",content:(await SM(m)).text})}catch(_){aiH.pop();msg=t("aib")}aiBusy=false}
+ render();
+});
+
+</script></body></html>
