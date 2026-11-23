@@ -24,6 +24,7 @@ input,select,textarea{font:inherit;width:100%;padding:10px;border:1px solid var(
 .stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.stat div{background:var(--bg);border-radius:12px;padding:12px;text-align:center}.stat b{font-size:1.6rem;display:block;color:var(--ac)}
 .due{color:var(--no);font-weight:600}
 </style></head><body><div class="w" id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 const D={
 title:["School Portal","学校门户","የትምህርት ቤት መግቢያ"],tag:["Homework, attendance, class chat and your own AI helper.","作业、考勤、班级群聊和专属AI助手。","የቤት ሥራ፣ መገኘት፣ የክፍል ውይይትና የራስዎ AI ረዳት።"],
@@ -69,11 +70,17 @@ const genCode=()=>{const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";for(let i=
 const lsGet=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"null")??d}catch(e){return d}},lsPut=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const done=()=>lsGet("sp_done_"+me.sid,[]);
 /* storage: shared database when available, else this device only */
-function sub(c){if(db){db.collection(c).onSnapshot(s=>{S[c]=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{});return}
+const SB_URL="PASTE_YOUR_SUPABASE_URL_HERE",SB_KEY="sb_publishable_gkkSSlSG-YuB4Ilav6n57A_g7s8ziG4",AI_URL="";
+let sb=null;const loaders={};
+function sub(c){
+ if(sb){loaders[c]=async()=>{const{data,error}=await sb.from("kv").select("id,data").eq("col",c);if(error){msg=error.message;return render()}S[c]=data.map(r=>({id:r.id,...r.data}));render()};loaders[c]();
+  sb.channel("kv-"+c).on("postgres_changes",{event:"*",schema:"public",table:"kv",filter:"col=eq."+c},()=>loaders[c]()).subscribe();return}
  subs[c]=()=>{S[c]=Object.entries(lsGet("sp_"+c,{})).map(([id,v])=>({id,...v}));render()};subs[c]()}
-async function put(c,id,d){if(db){try{await db.collection(c).doc(id).set(d)}catch(e){msg=e.message||e.code}}else{const o=lsGet("sp_"+c,{});o[id]=d;lsPut("sp_"+c,o);subs[c]()}}
-async function del(c,id){if(db){try{await db.collection(c).doc(id).delete()}catch(e){msg=e.message||e.code}}else{const o=lsGet("sp_"+c,{});delete o[id];lsPut("sp_"+c,o);subs[c]()}}
-(async()=>{try{if(window.claude){db=await claude.use("db");A=await claude.use("assets");SM=await claude.use("sample")}}catch(e){}COL.forEach(sub);render()})();
+async function put(c,id,d){if(sb){const{error}=await sb.from("kv").upsert({col:c,id,data:d});if(error)msg=error.message;else{S[c]=[...S[c].filter(x=>x.id!==id),{id,...d}]}}else{const o=lsGet("sp_"+c,{});o[id]=d;lsPut("sp_"+c,o);subs[c]()}}
+async function del(c,id){if(sb){const{error}=await sb.from("kv").delete().eq("col",c).eq("id",id);if(error)msg=error.message;else S[c]=S[c].filter(x=>x.id!==id)}else{const o=lsGet("sp_"+c,{});delete o[id];lsPut("sp_"+c,o);subs[c]()}}
+(()=>{try{if(SB_URL.startsWith("http")&&window.supabase){sb=supabase.createClient(SB_URL,SB_KEY);db=sb}}catch(e){}
+ if(AI_URL)SM=async i=>{const r=await fetch(AI_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({input:i})});return await r.json()};
+ COL.forEach(sub);render();if(sb)setInterval(()=>COL.forEach(c=>loaders[c]&&loaders[c]()),15000)})();
 
 function render(){
  const a=$("#app"),keep={},ae=document.activeElement&&document.activeElement.id;
@@ -154,7 +161,7 @@ function homeT(){
  <div class="card"><h3>${t("att")}</h3>${mk?`<p class="ok">${t("okatt")}</p>`:code?`<p>${t("aopen")}</p><button data-a="tab" data-t="att">${t("goatt")}</button>`:`<p class="mu">${t("anot")}</p>`}</div>
  ${pins.length?`<div class="card"><h3>${t("pins")}</h3>${pins.map(row).join("")}</div>`:""}${nw.length?`<div class="card"><h3>${t("newt")}</h3>${nw.map(row).join("")}</div>`:""}
  <div class="card"><h3>${t("todo")}</h3>${todo.length?todo.map(row).join(""):`<p>${t("nod")}</p>`}</div>`}
-async function up(f){if(!A){msg=t("upx");return null}try{return (await A.upload(f)).url}catch(e){msg=e.message||t("upx");return null}}
+async function up(f){if(!sb){msg=t("upx");return null}const p=Date.now()+"-"+uid()+"-"+f.name.replace(/[^\w.\-]/g,"_");const{error}=await sb.storage.from("uploads").upload(p,f);if(error){msg=error.message;return null}return sb.storage.from("uploads").getPublicUrl(p).data.publicUrl}
 const sys=()=>"You are a friendly study helper for students of a Chinese-language school in Ethiopia. Courses: Elementary Listening & Speaking 1, Chinese Phonetics, Elementary Comprehensive Chinese, A Survey of Chinese Society and Life. Explain simply, give pinyin with Chinese characters, and reply in "+["English","Chinese","Amharic"][LI]+" unless asked otherwise. Keep answers short.";
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&(e.target.id==="cm"||e.target.id==="aiq")){e.preventDefault();document.querySelector(`[data-a=${e.target.id==="cm"?"sendm":"ask"}]`).click()}});
 const onType=e=>{if(e.isComposing)return;if(e.target.id==="qs"){q=e.target.value;render()}if(e.target.id==="dq")$("#dres").innerHTML=dres(e.target.value)};
@@ -180,7 +187,7 @@ document.addEventListener("click",async e=>{
  else if(a==="gen")await put("codes",sel,{code:genCode()});
  else if(a==="mark"){const c=S.codes.find(x=>x.id===today());if(!c||c.code!==v("ac").toUpperCase()){msg=t("badc");return render()}await put("present",today()+"__"+me.sid,{date:today(),name:me.name,sid:me.sid,sec:me.sec,time:clock()})}
  else if(a==="csv"){const r=["date,id,name,section,time",...[...S.present].sort((x,y)=>x.date.localeCompare(y.date)).map(p=>[p.date,p.sid,'"'+p.name.replace(/"/g,'""')+'"',p.sec||"",p.time].join(","))].join("\n");
-  try{const d=await claude.use("downloads");await d.save({filename:"attendance.csv",data:r})}catch(_){msg=t("upx")}}
+  try{const u=URL.createObjectURL(new Blob([r],{type:"text/csv"})),l=document.createElement("a");l.href=u;l.download="attendance.csv";l.click()}catch(_){msg=t("upx")}}
  else if(a==="join")await put("group",me.sid,{name:me.name,sec:me.sec});
  else if(a==="addg"){if(!v("gn")||!v("gi")){msg=t("need");return render()}await put("group",v("gi"),{name:v("gn"),sec:v("gs")});["gn","gi"].forEach(i=>$("#"+i).value="")}
  else if(a==="delg")await del("group",b.dataset.i);else if(a==="delm")await del("chat",b.dataset.i);
